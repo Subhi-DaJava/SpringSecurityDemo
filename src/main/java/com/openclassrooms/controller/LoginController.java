@@ -51,7 +51,7 @@ public class LoginController {
 	/*
 	 * une méthode différente pour chaque rôle, en utilisant les classes @RolesAllowed et @RequestMapping pour associer l’URL au rôle.
 	 */
-	@RequestMapping("/**")
+	@RequestMapping("/user")
 	@RolesAllowed("USER")
 	public String getUser(Principal user) {
 		return "Welcome, User : " + user.getName();
@@ -92,7 +92,7 @@ public class LoginController {
 
 	 *  
 	 */
-	@RequestMapping("/*")
+	@RequestMapping("/auth")
 	public String getUserInfo(Principal user) {
 		StringBuffer userInfo = new StringBuffer();
 		if(user instanceof UsernamePasswordAuthenticationToken) {
@@ -224,6 +224,12 @@ public class LoginController {
 			return oidcUser.getIdToken();
 		}
 		return null;
+	}
+	
+	@RequestMapping("/")
+	@RolesAllowed({"ADMIN","USER"})
+	public String testPage() {
+		return "Just A Test";
 	}
 
 }
