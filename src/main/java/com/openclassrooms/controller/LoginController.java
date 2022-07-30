@@ -26,6 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class LoginController {
+	/*
+	* Configurer la connexion par défaut OAuth 2.0 dans la chaîne de filtres de sécurité.  
+	* Enregistrer votre application web avec GitHub et Google, pour avoir un client ID et un client secret. 
+	* Ajouter la configuration GitHub dans le fichier application.properties. 
+	* Extraire les informations du principal user détails et du token d’accès depuis GitHub.
+	* Configurer OIDC avec GitHub dans le fichier application.properties.
+	* Extraire le principal, le token d’accès, et le ID Token depuis Google.
+	* Décoder l’ID Token pour extraire les informations du claim.
+
+	 */
+	
 	/**
 	 * une variable finale privée pour votre classe LoginController de type OAuth2AuthenticationToken, 
 	 * et intitulez-la authClientService. Elle permettra de stocker le token de façon sécurisée et immuable : 
@@ -180,7 +191,7 @@ public class LoginController {
 			 * à la méthode getClaims() spécifiée dans la classe DefaultOidcUser.
 			 */
 			if(idToken != null) {
-				protectedInfo.append("idToken value: " + idToken.getTokenValue());
+				protectedInfo.append("idToken value: " + idToken.getTokenValue() + "<br><br>");
 				protectedInfo.append("Token mapped values <br><br>");
 				
 				/*
@@ -189,6 +200,7 @@ public class LoginController {
 				 */
 				
 				Map<String, Object> claims = idToken.getClaims();
+				
 				for(String key : claims.keySet()) {
 					protectedInfo.append(" " + key + ": " + claims.get(key) + "<br>");
 				}
