@@ -10,7 +10,10 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 /**
@@ -122,6 +125,16 @@ public class LoginController {
 	 * ***
 	 * Grâce à la classe OAuth2AuthenticationToken, l’application client a la permission d’accéder
 	 * à davantage de ressources protégées, comme le token d‘accès. 
+	 * 
+	 * ***
+	 * La clé pour ajouter OpenID Connect à votre requête originale dans le serveur de connexion est le scope pour openid,
+	 * ainsi que les claims. openid en tant que scope; profil et email en tant que claims.
+	 * Ces derniers devraient être récupérés avec le token ID et le token d’accès dans l’objet Principal user. 
+	 * À présent, vous devez ajouter votre récupération de token ID à votre fichier LoginController.java. 
+	 * Cette procédure contribue au fonctionnement du scope openid. 
+	 * L’ID Token est une ressource protégée, vous devez donc l’ajouter dans votre méthode Oauth2LoginInfo()pour le récupérer. 
+
+	 * 
 	 * @param user
 	 * @return
 	 */
@@ -130,6 +143,13 @@ public class LoginController {
 		StringBuffer protectedInfo = new StringBuffer();
 		
 		OAuth2AuthenticationToken authToken = ((OAuth2AuthenticationToken) user);
+		/*
+		 * Instanciez la classe OAuth2User en l’appelant principal . Cette variable récupérera l'utilisateur via OAuth2AuthenticatedToken,
+		 *  pour ensuite récupérer le token ID et imprimer la chaîne de caractères encodés. La méthode getPrincipal()obtient 
+		 *  toutes les informations dont les classes OIDC ont besoin pour créer un nouvel ID Token.
+		 */
+		OAuth2User principal = ((OAuth2AuthenticationToken) user).getPrincipal();
+		
 		/*
 		 * Instanciez votre objet OAuth2AuthorizedClient. Vous remarquerez que 
 		 * la méthode loadAuthorizedClient retourne le client qui correspond à l’ID et au nom du principal transmis en paramètre.
@@ -153,6 +173,26 @@ public class LoginController {
 			protectedInfo.append("Welcome, " + userAttributes.get("name") + "<br><br>");
 			protectedInfo.append("email: "+ userAttributes.get("email") + "<br><br>");
 			protectedInfo.append("Access Token: " + userToken + "<br><br>");
+			
+			OidcIdToken idToken = getIdToken(principal);
+			/*
+			 * vous obtenez un HashMap, avec vos claims que vous pouvez récupérer en ayant recours 
+			 * à la méthode getClaims() spécifiée dans la classe DefaultOidcUser.
+			 */
+			if(idToken != null) {
+				protectedInfo.append("idToken value: " + idToken.getTokenValue());
+				protectedInfo.append("Token mapped values <br><br>");
+				
+				/*
+				 * Lorsque vous utilisez OIDC, vous pouvez spécifier les informations que vous souhaitez que 
+				 * l’utilisateur autorise dans le scope. Ces informations spécifiques s'appellent des claims.
+				 */
+				
+				Map<String, Object> claims = idToken.getClaims();
+				for(String key : claims.keySet()) {
+					protectedInfo.append(" " + key + ": " + claims.get(key) + "<br>");
+				}
+			}
 		}
 		else {
 			protectedInfo.append("NA");
@@ -162,6 +202,16 @@ public class LoginController {
 		
 	}
 	
-
+	/*
+	 * un nouveau getter pour l'ID Token. La classe de retour sera un OidcIdToken,
+	 *  une classe utilisée pour faire des ID Token. DefaultOidCUser est un sous-ensemble de OidcUser, et donc de OAuth2User.
+	 */
+	private OidcIdToken getIdToken(OAuth2User principal) {
+		if(principal instanceof DefaultOidcUser) {
+			DefaultOidcUser oidcUser = (DefaultOidcUser) principal;
+			return oidcUser.getIdToken();
+		}
+		return null;
+	}
 
 }
