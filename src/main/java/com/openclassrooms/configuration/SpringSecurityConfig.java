@@ -62,7 +62,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 		.antMatchers("/user").hasRole("USER")
 		.anyRequest().authenticated() //anyRequest().authenticated() pour vous permettre d’utiliser le formulaire ci-dessous pour l’authentification.
 		.and()
-		.formLogin();
+		.formLogin()
+		.and()
+		.oauth2Login();
 		
 	}
 	/**

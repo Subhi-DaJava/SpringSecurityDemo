@@ -19,7 +19,7 @@ public class LoginController {
 	/*
 	 * une méthode différente pour chaque rôle, en utilisant les classes @RolesAllowed et @RequestMapping pour associer l’URL au rôle.
 	 */
-	@RequestMapping("/*")
+	@RequestMapping("/**")
 	@RolesAllowed("USER")
 	public String getUser(Principal user) {
 		return "Welcome, User : " + user.getName();
@@ -29,6 +29,17 @@ public class LoginController {
 	@RolesAllowed("ADMIN")
 	public String getAdmin(Principal principal) {
 		return "Welcome, Admin : " + principal.getName();
+	}
+	/*
+	 * Pour utiliser notre application web client avec une connexion GitHub, 
+	 * vous aurez besoin de vous enregistrer sur GitHub pour obtenir une identité client et un client secret. 
+	 * Ces deux appellations font référence aux traditionnels nom d’utilisateur et mot de passe pour votre app web;
+	 * c'est ce qui vous permet de vous connecter au serveur d’autorisation de GitHub avec OAuth 2.0.
+	 * GitHub génère dynamiquement une URL de redirection qui correspond à votre identité client. 
+	 */
+	@RequestMapping("/*")
+	public String getGithub(Principal user) {
+		return "Welcom, GitHub user : " + user.toString();
 	}
 
 }
